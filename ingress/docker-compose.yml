@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  ### build nginx LB ###
+  ingress:
+    build:
+      context: ./config
+      dockerfile: Dockerfile
+      args:
+        nginxversion: 1.14.2
+    restart: always
+    networks:
+      concourse_network:
+        ipv4_address: 172.18.0.2
+    container_name: ingress
+    external_links:
+      - web:web
+    ports:
+      - "80:80"
+    volumes:
+      - "./config/nginx.conf:/opt/nginx/conf/nginx.conf"
+      - "./config/conf.d:/opt/nginx/conf/conf.d"
+      - "./config/entrypoint.sh:/root/entrypoint.sh"
+      - "./config/log:/var/log/nginx"
+    entrypoint: sh /root/entrypoint.sh
+
+networks:
+  wp_network:
+    ipam:
+      config:
+    - subnet: 172.18.0.0/24
